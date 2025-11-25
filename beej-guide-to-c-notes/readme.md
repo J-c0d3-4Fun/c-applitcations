@@ -5,6 +5,8 @@
 
 This directory contains my code labs, exercises, and study notes from following **[Beej's Guide to C Programming](https://beej.us/guide/bgc/)**. While the main repository covers the basics, this section focuses on how C works "under the hood."
 
+> **🎯 Learning Goal:** This deep dive into C is specifically aimed at understanding memory management, pointers, and system I/O for future **Command & Control (C2) framework development**. Mastering these low-level concepts is crucial for Red Team operations and malware development.
+
 ## 🧪 Code Labs
 
 | Exercise | Description | Status |
@@ -47,12 +49,26 @@ void setPrice(struct truck *t, float newPrice) {
 }
 ```
 
----
+### 📂 File I/O & Streams
+All I/O in C is handled through the `FILE*` type, which holds the state of the stream (position, status, etc.).
 
-## 🧠 Key Takeaways
-- **Pointers vs Arrays**: An uninitialized pointer (`char *p`) points to garbage; an array (`char p[255]`) reserves actual safe memory.
-- **Immutability**: String literals (`char *s = "Hello"`) are stored in read-only memory and cannot be modified.
-- **Arrow Syntax**: `ptr->field` is exactly the same as `(*ptr).field`, just cleaner.
+#### Standard Streams
+| `FILE*` Name | Description | Default Source/Dest |
+|:---|:---|:---|
+| `stdin` | Standard Input | Keyboard |
+| `stdout` | Standard Output | Screen/Console |
+| `stderr` | Standard Error | Screen/Console |
+
+#### Text vs Binary
+1.  **Text Streams**: Use `fgetc()`, `fgets()`, `fscanf()` to read, and `fputc()`, `fputs()`, `fprintf()` to write.
+2.  **Binary Files**: Raw stream of bytes.
+    *   **Mode**: Must add `"b"` to the mode string (e.g., `"rb"` for read binary, `"wb"` for write binary).
+    *   **Functions**: `fread()` and `fwrite()` to handle raw byte buffers.
+
+> **🕵️‍♂️ Red Team Note:**
+> Binary file handling (`fread`/`fwrite`) is critical for **data exfiltration**.
+> *   *Concept:* Read sensitive files as raw binary.
+> *   *Challenge:* Need to implement **obfuscation/encryption** (XOR, AES) on the buffer before writing or sending it to the C2 server to avoid detection.
 
 ---
 *Notes maintained by [J Brown](https://github.com/J-c0d3-4Fun)*
