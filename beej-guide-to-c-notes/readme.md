@@ -15,6 +15,7 @@ This directory contains my code labs, exercises, and study notes from following 
 | **[`arrowop.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/arrowop.c)** | Demonstrating the arrow operator (`->`) to access and modify struct fields via pointers. | ✅ Completed |
 | **[`typedef.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/typedef.c)** | Exploring type abstraction, anonymous structs, and pointer obfuscation. | ✅ Completed |
 | **[`quickSort.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/quickSort.c)** | Implementing `qsort` with a custom comparator function (function pointers). | ✅ Completed |
+| **[`manualMemoryAllocation.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/manualMemoryAllocation.c)** | Experiments with manual memory management (`malloc`, `calloc`, `realloc`, `free`). | ✅ Completed |
 
 ---
 
@@ -101,5 +102,18 @@ A common bug when iterating or sorting arrays is using `sizeof(array)` and expec
 > *   *API Hooking:* You overwrite a function pointer in memory to redirect execution to your malicious code.
 > *   *Indirect Execution:* Instead of calling `VirtualAlloc` directly (which is flagged by AV), you might find a pointer to it in memory and call it dynamically to hide your intent.
 
+### 💾 Manual Memory Management
+Memory on the **Heap** must be manually managed. This gives you control but also responsibility.
+
+1.  **`malloc(size)`**: Allocates `size` bytes. **Contains garbage** (uninitialized).
+2.  **`calloc(count, size)`**: Allocates `count * size` bytes. **Zeroes out memory** (safe).
+3.  **`realloc(ptr, new_size)`**: Resizes an existing block. Useful for growing buffers when reading files of unknown size.
+4.  **`free(ptr)`**: Returns memory to the system. Forgetting this causes **Memory Leaks**.
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **Shellcode Loading:** Standard `malloc` allocates **RW** (Read-Write) memory. To run shellcode, you typically need **RWX** (Read-Write-Execute) memory. In real malware, you'll use OS-specific APIs like `VirtualAlloc` (Windows) or `mmap` (Linux) to control these permissions.
+> *   **Heap Exploitation:** Understanding how `malloc` organizes chunks of memory is the first step to learning **Heap Overflows** and **Use-After-Free** exploits.
+
 ---
 *Notes maintained by [J Brown](https://github.com/J-c0d3-4Fun)*
+*These notes and labs are adapted from [Beej's Guide](https://beej.us/guide/bgc/) for educational purposes. Code is modified for experimentation.*
