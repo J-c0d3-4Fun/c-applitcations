@@ -146,6 +146,42 @@ Understanding the exact size of data types is critical when crafting payloads or
 *   **Unsigned Variants**: Always start at `0` and go up to `U<TYPE>_MAX` (e.g., `UINT_MAX`).
 *   **Headers**: Use `<limits.h>` for integers and `<float.h>` for floats.
 
+
+
+
+
+### 🔣 Number Bases & Representation
+In systems programming and exploitation, you rarely work with Base 10.
+1.  **Hexadecimal (`0x`)**: `int x = 0x1A2B;` - Used for memory addresses and machine code.
+2.  **Octal (`0`)**: `int x = 012;` - Often used for Unix file permissions (e.g., `0755`).
+3.  **ASCII**: `char` types are just 1-byte integers mapped to characters. `char a = 10;` is a valid integer value (newline).
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **Hex Dumps**: You must get comfortable reading Hex. A buffer overflow payload or a network packet capture will always be viewed in Hex.
+> *   **Shellcode**: Shellcode is often represented as a C string of hex values: `"\x90\x90\xeb\x04..."`.
+> *   **ASCII Strings**: One of the quickest wins in Reverse Engineering is running the `strings` command on a binary to see what text is embedded (IP addresses, error messages, passwords).
+
+### 🧪 Type Literals & Suffixes
+When writing constants, you can specify their type explicitly using suffixes (case-insensitive).
+
+| Type | Suffix | Example |
+|:---|:---|:---|
+| `long` | `L` | `1234L` |
+| `long long` | `LL` | `1234LL` |
+| `unsigned` | `U` | `1234U` |
+| `unsigned long` | `UL` | `1234UL` |
+| `float` | `F` | `3.14F` |
+| `long double` | `L` | `3.14L` |
+
+> **Tip:** `double` is the default for floating point numbers (e.g., `3.14`).
+
+
+
+
+
+
+
+
 ---
 *Notes maintained by [J Brown](https://github.com/J-c0d3-4Fun)*
 *These notes and labs are adapted from [Beej's Guide](https://beej.us/guide/bgc/) for educational purposes. Code is modified for experimentation.*

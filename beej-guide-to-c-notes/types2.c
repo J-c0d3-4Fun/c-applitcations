@@ -14,6 +14,7 @@
 
 
 
+
 // ASCII
 /*
 first 128 characters, the character constant will be 
@@ -47,5 +48,13 @@ int main (void) {
     char b = 'C';
 
     printf("the result: %d", a  + b);
+   
+//  case doesnt matter for hex digits
+   int g = 0x1A2B; // Hexadecimal 
+
+   int n = 012; // Octal number, "12"
+   
+   
     return 0;
+
 }
