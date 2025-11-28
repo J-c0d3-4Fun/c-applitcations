@@ -182,6 +182,24 @@ When writing constants, you can specify their type explicitly using suffixes (ca
 
 
 
+Function	Description
+atoi	String to int
+atof	String to float
+atol	String to long int
+atoll	String to long long int
+
+
+Function	Description
+strtol	String to long int
+strtoll	String to long long int
+strtoul	String to unsigned long int
+strtoull	String to unsigned long long int
+strtof	String to float
+strtod	String to double
+strtold	String to long double
+
+
+
 ---
 *Notes maintained by [J Brown](https://github.com/J-c0d3-4Fun)*
 *These notes and labs are adapted from [Beej's Guide](https://beej.us/guide/bgc/) for educational purposes. Code is modified for experimentation.*
