@@ -19,6 +19,9 @@ This directory contains my code labs, exercises, and study notes from following 
 | **[`types2.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/types2.c)** | Exploration of integer types, `<limits.h>`, Hex/Octal notation, and ASCII values. | ✅ Completed |
 | **[`types3.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/types3.c)** | String-to-Number conversions (`strtol`, `snprintf`) and Explicit Type Casting. | ✅ Completed |
 | **[`types4.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/types4.c)** | Deep dive into Type Qualifiers (`const`, `volatile`, `restrict`) and Storage Classes (`static`, `extern`). | ✅ Completed |
+| **[`multifileProjects.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/multifileProjects.c)** | Organizing code across multiple files, header guards, and object file compilation. | ✅ Completed |
+| **[`static.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/static.c)** | Demonstrating `static` variables for state persistence within functions. | ✅ Completed |
+| **[`restrict.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/restrict.c)** | Using the `restrict` keyword to optimize memory access and avoid pointer aliasing. | ✅ Completed |
 | **[`readLinesOfArbitraryLength.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/readLinesOfArbitraryLength.c)** | Building a robust `readLine` function that grows the buffer dynamically with `realloc`. | ✅ Completed |
 | **[`memoryCopy.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/memoryCopy.c)** | Re-implementing `memcpy` using `void*` to copy any data type byte-by-byte. | ✅ Completed |
 | **[`voidPtr.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/voidPtr.c)** | Understanding `void*` (generic pointers) and their limitations (no arithmetic/dereferencing). | ✅ Completed |
@@ -220,6 +223,32 @@ Tells the compiler: *"This variable exists, but it's defined in another file."*
 > *   **`volatile` & Evasion**: When writing **Anti-Debugging** loops (e.g., checking `rdtsc` to see if you're being stepped through), you MUST mark variables as `volatile`. If you don't, the compiler might optimize away your check, thinking the variable never changes.
 > *   **`static` & Obfuscation**: Making your helper functions `static` keeps them internal. This shrinks the "Export Table" of your DLL/EXE, giving Reverse Engineers fewer clues (named functions) to work with.
 > *   **`extern`**: Often used in **Rootkits** to hook kernel symbols exported by the OS.
+
+### 📦 Multi-File Projects & Compilation
+Real-world software is split across many files.
+1.  **Header Files (`.h`)**: Contain function prototypes and struct definitions.
+2.  **Source Files (`.c`)**: Contain the actual logic.
+3.  **Object Files (`.o` / `.obj`)**: The compiled intermediate machine code.
+    *   Linux/Mac: `clang -c foo.c` -> `foo.o`
+    *   Windows: `cl /c foo.c` -> `foo.obj`
+
+#### Header Guards
+To prevent including the same header twice (which causes redefinition errors), wrap headers in guards:
+```c
+#ifndef FOO_H
+#define FOO_H
+// code...
+#endif
+```
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **Modular Malware**: Sophisticated C2 implants are modular. You'll have `network.c`, `crypto.c`, `shellcode.c`. You compile them into individual object files and link them at the end.
+> *   **Static Linking**: Attackers often prefer **Static Linking** (bundling all dependencies into one `.exe`) so the malware runs on any victim machine without needing DLLs installed.
+
+### ⚡ Optimization: `restrict`
+The `restrict` keyword tells the compiler: *"I promise this pointer is the ONLY way to access this specific memory."*
+*   **Benefit**: Allows aggressive compiler optimizations.
+*   **Risk**: If you lie (alias two restricted pointers to the same address), you get **Undefined Behavior**.
 
 ---
 *Notes maintained by [J Brown](https://github.com/J-c0d3-4Fun)*
