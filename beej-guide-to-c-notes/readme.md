@@ -31,6 +31,11 @@ This directory contains my code labs, exercises, and study notes from following 
 | **[`memoryCopy.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/memoryCopy.c)** | Re-implementing `memcpy` using `void*` to copy any data type byte-by-byte. | ✅ Completed |
 | **[`voidPtr.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/voidPtr.c)** | Understanding `void*` (generic pointers) and their limitations (no arithmetic/dereferencing). | ✅ Completed |
 | **[`pointers2arithmetic.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/pointers2arithmetic.c)** | Moving a "cursor" through an array using pointer arithmetic (`*(p+i)`). | ✅ Completed |
+| **[`theCPreprocessor.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/theCPreprocessor.c)** | Exploring macros, conditional compilation, `#embed`, and built-in macros. | ✅ Completed |
+| **[`variadicFunctions.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/variadicFunctions.c)** | Implementing functions with variable arguments using `<stdarg.h>` and `va_list`. | ✅ Completed |
+| **[`unicode.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/unicode.c)** | Working with Unicode code points, wide characters (`wchar_t`), and the `L` prefix. | ✅ Completed |
+| **[`convertMultibyteToWideChar.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/convertMultibyteToWideChar.c)** | Converting between multibyte strings and wide character strings using `mbstowcs()`. | ✅ Completed |
+| **[`exits.c`](file:///Users/jbrown/C-Dev-Sandbox/beej-guide-to-c-notes/exits.c)** | Program termination with `exit()`, `atexit()` handlers, `_Exit()`, `abort()`, and `assert()`. | ✅ Completed |
 
 ---
 
@@ -54,9 +59,9 @@ In C, a "string" isn't a primitive type like in Python or Java. It is defined by
 The arrow operator is primarily used when referring to fields inside **pointers to structs**.
 
 #### Why use pointers to structs?
-There are basically two main cases when you’d want to pass a pointer to a struct instead of the struct itself:
+There are basically two main cases when you'd want to pass a pointer to a struct instead of the struct itself:
 
-1.  **Efficiency**: The struct is large, and it’s more expensive to copy that entire data structure onto the stack than it is to just copy a small pointer (memory address).
+1.  **Efficiency**: The struct is large, and it's more expensive to copy that entire data structure onto the stack than it is to just copy a small pointer (memory address).
 2.  **Mutability (State Change)**: You need the function to be able to make changes to the struct that was passed in, and have those changes show in the caller.
 
 **Example:**
@@ -340,6 +345,170 @@ Sometimes you need a struct that can hold a variable amount of data (like a netw
 The `restrict` keyword tells the compiler: *"I promise this pointer is the ONLY way to access this specific memory."*
 *   **Benefit**: Allows aggressive compiler optimizations.
 *   **Risk**: If you lie (alias two restricted pointers to the same address), you get **Undefined Behavior**.
+
+### 📞 Variadic Functions
+Variadic functions accept an **arbitrary number of arguments**. The classic example is `printf()`.
+
+#### How It Works:
+1.  **Signature**: Use `...` (ellipsis) after at least one named parameter.
+    ```c
+    void myFunc(int count, ...) { }
+    ```
+2.  **Processing**: Include `<stdarg.h>` and use these macros:
+    *   `va_list`: An opaque type that holds argument state.
+    *   `va_start(va_list, last_named_param)`: Initialize the list.
+    *   `va_arg(va_list, type)`: Retrieve the next argument (you must specify the type).
+    *   `va_end(va_list)`: Clean up when done.
+
+**Example:**
+```c
+#include <stdarg.h>
+int sum(int count, ...) {
+    va_list args;
+    va_start(args, count);
+    int total = 0;
+    for (int i = 0; i < count; i++) {
+        total += va_arg(args, int);
+    }
+    va_end(args);
+    return total;
+}
+// Usage: sum(3, 10, 20, 30) returns 60
+```
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **Format String Attacks**: Variadic functions like `printf` are the root cause of **Format String Vulnerabilities**. If user input is passed directly as the format string (`printf(user_input)`), an attacker can use `%x` to leak stack data or `%n` to write to memory.
+> *   **Custom Logging**: When building a C2 implant, you might create a variadic `debug_log(char *fmt, ...)` function that can be toggled on/off at compile time with `#ifdef DEBUG`.
+
+### 🔧 Bitwise Operators
+Direct manipulation of individual bits. Essential for low-level programming, cryptography, and protocol parsing.
+
+#### Logical Bitwise Operations
+| Operation | Operator | Example |
+|:---|:---|:---|
+| AND | `&` | `a = b & c` |
+| OR | `\|` | `a = b \| c` |
+| XOR | `^` | `a = b ^ c` |
+| NOT | `~` | `a = ~c` |
+
+#### Assignment Shorthand
+| Operator | Example | Longhand Equivalent |
+|:---|:---|:---|
+| `&=` | `a &= c` | `a = a & c` |
+| `\|=` | `a \|= c` | `a = a \| c` |
+| `^=` | `a ^= c` | `a = a ^ c` |
+
+#### Bit Shifting
+| Operation | Operator | Example |
+|:---|:---|:---|
+| Shift Left | `<<` | `a = b << c` |
+| Shift Right | `>>` | `a = b >> c` |
+
+| Operator | Example | Longhand Equivalent |
+|:---|:---|:---|
+| `>>=` | `a >>= c` | `a = a >> c` |
+| `<<=` | `a <<= c` | `a = a << c` |
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **XOR Encryption**: The simplest form of obfuscation. `data ^= key` encrypts, and `data ^= key` again decrypts. Used to hide shellcode strings from static analysis.
+> *   **Flag Manipulation**: Permissions and status flags are often stored as bitmasks. Use `|` to set a flag, `& ~` to clear it, and `&` to check it.
+> *   **Network Protocols**: Parsing packet headers often requires shifting and masking to extract specific fields (e.g., extracting the 4-bit version field from an IP header).
+
+### 🌐 Unicode, Wide Characters & Multibyte Strings
+C has two main ways to handle characters beyond basic ASCII.
+
+#### Key Concepts
+*   **Code Point**: A numeric value representing a character (e.g., `66` = 'B', `0x20AC` = '€').
+*   **Encoding**: How that number is stored in memory (UTF-8, UTF-16, UTF-32).
+
+#### Common Encodings
+| Encoding | Description |
+|:---|:---|
+| UTF-8 | Variable-length (1-4 bytes per char). The standard for the web and most modern systems. |
+| UTF-16 | 2 bytes per character (or 4 for rare chars). Used by Windows APIs. |
+| UTF-32 | 4 bytes per character. Simple but memory-heavy. |
+
+#### Multibyte vs. Wide Characters
+*   **Multibyte (`char *`)**: Standard C strings. UTF-8 encoded. `strlen()` returns **bytes**, not characters.
+*   **Wide Character (`wchar_t`)**: A fixed-size type for Unicode. Use `L"string"` prefix. Print with `%ls`.
+
+#### Conversion Functions
+| Function | Description |
+|:---|:---|
+| `mbtowc()` | Convert a multibyte character to a wide character. |
+| `wctomb()` | Convert a wide character to a multibyte character. |
+| `mbstowcs()` | Convert a multibyte string to a wide string. |
+| `wcstombs()` | Convert a wide string to a multibyte string. |
+
+#### Wide Character I/O (`<wchar.h>`)
+| Function | Description |
+|:---|:---|
+| `wprintf()` / `wscanf()` | Formatted console I/O. |
+| `fwprintf()` / `fwscanf()` | Formatted file I/O. |
+| `fgetws()` / `fputws()` | String-based file I/O. |
+| `getwchar()` / `putwchar()` | Character-based console I/O. |
+
+#### Wide String Functions (`<wchar.h>`)
+| Function | Description |
+|:---|:---|
+| `wcscpy()` / `wcsncpy()` | Copy wide strings. |
+| `wcscat()` / `wcsncat()` | Concatenate wide strings. |
+| `wcslen()` | Get wide string length (in characters). |
+| `wcschr()` / `wcsstr()` | Search for char/substring. |
+| `wcstol()` / `wcstod()` | Convert wide string to number. |
+
+#### Wide Character Classification (`<wctype.h>`)
+| Function | Description |
+|:---|:---|
+| `iswalpha()` / `iswalnum()` | Check if alphabetic/alphanumeric. |
+| `iswdigit()` / `iswxdigit()` | Check if digit/hex digit. |
+| `iswupper()` / `iswlower()` | Check case. |
+| `towupper()` / `towlower()` | Convert case. |
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **Windows API**: Many Windows APIs have "A" (ANSI/multibyte) and "W" (Wide) versions. Malware often uses the "W" versions directly (e.g., `CreateFileW`) to handle international file paths and avoid encoding issues.
+> *   **Obfuscation**: Storing strings as wide characters or in unusual encodings can evade basic `strings` analysis tools that only look for ASCII.
+> *   **Shellcode Loaders**: When targeting Windows, you may need to convert C2 server addresses or file paths to wide strings before passing them to `WinAPI` functions.
+
+### 🚪 Program Exit & Assertions
+Multiple ways to terminate a C program, each with different behaviors.
+
+#### Exit Functions
+| Function | Behavior |
+|:---|:---|
+| `exit(status)` | Clean exit. Flushes buffers, calls `atexit()` handlers. |
+| `_Exit(status)` | Immediate exit. No cleanup, no handlers. |
+| `abort()` | Abnormal termination. Signals failure to the OS. |
+
+#### Exit Status Codes
+*   `EXIT_SUCCESS` (typically `0`): Program completed successfully.
+*   `EXIT_FAILURE` (typically `1`): Program encountered an error.
+
+#### `atexit()` Handlers
+Register functions to run automatically when the program exits cleanly.
+```c
+void cleanup(void) { printf("Cleaning up...\n"); }
+int main(void) {
+    atexit(cleanup);  // Registers cleanup()
+    // ... program logic ...
+    exit(EXIT_SUCCESS);  // cleanup() runs here
+}
+```
+*   Handlers are called in **reverse order** of registration (LIFO).
+
+#### `assert()` Macro
+Insist that a condition is true, or crash with a diagnostic message.
+```c
+#include <assert.h>
+assert(ptr != NULL);  // Crashes if ptr is NULL
+```
+*   Disabled by defining `NDEBUG` before including `<assert.h>`.
+
+> **🕵️‍♂️ Red Team Note:**
+> *   **Anti-Analysis**: Malware might use `_Exit()` or `abort()` to terminate immediately if it detects a debugger or sandbox, preventing analysis.
+> *   **Persistence Cleanup**: An `atexit()` handler could be used to remove artifacts (registry keys, dropped files) if the implant exits gracefully.
+> *   **Debug Builds**: Use `assert()` liberally during development but compile with `-DNDEBUG` for release builds to remove all assertions.
+
 ---
 *Notes maintained by [J Brown](https://github.com/J-c0d3-4Fun)*
 *These notes and labs are adapted from [Beej's Guide](https://beej.us/guide/bgc/) for educational purposes. Code is modified for experimentation.*
